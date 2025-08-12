@@ -1,3 +1,3 @@
-Perspective of TTC_Finch Project
+**Perspective of TTC_Finch Project**
 
 In the Mass Gathering project, we investigate how infectious diseases disseminate when groups of individuals gather in a single location. Our earlier work focused on outbreaks aboard cruise ships. Building on that foundation, this phase of the project analyzes the spread of infectious diseases in a transportation hub and its surrounding community, using Finch subway station in Toronto and its immediate neighborhood as a case study. By combining real mobility data, parameter estimation, and stochastic modeling techniques, we aim to identify key factors influencing transmission between the hub and the community. These insights can inform public health strategies for mitigating disease spread in similar urban environments.
