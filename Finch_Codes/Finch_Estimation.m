@@ -1,7 +1,8 @@
-function [pa_estimate fval history] = FinchEstimation
+function [pa_estimate fval history] = Finch_Estimation
 format long
 
-%% Estimating Process for parameters in the community and hub(Finch station) over a single day
+%% Estimating Process for parameters for the disease model over a single day,
+%% using the least squares method
 
  history=[];
  Data=load('Data_mod.txt');
@@ -45,20 +46,25 @@ options = optimset('OutputFcn', @myoutput, 'TolFun', 1e-6);
 
 %---------------Plotting Process------------------------
 
-t_rush_mor=linspace(0,3,4);
-t_off_mor=linspace(3,9,7);
-t_rush_eve=linspace(9,13,5);
-t_off_eve=linspace(13,20,8);
-t_total=linspace(0,20,21);
+t_rush_mor=linspace(0,3,4);  % morning rush hours time interval
+t_off_mor=linspace(3,9,7);   % morning off-peak hours time interval
+t_rush_eve=linspace(9,13,5);  % evening rush hours time interval
+t_off_eve=linspace(13,20,8);  % evening  off-peak hours time interval
+t_total=linspace(0,20,21);    % total time interval
 
- error_estimate_rush_mor=zeros(length(t_rush_mor),1);
+
+% Evaluate the initial values for the error_estimate matrices
+
+ error_estimate_rush_mor=zeros(length(t_rush_mor),1); 
  error_estimate_off_mor=zeros(length(t_off_mor),1);
  error_estimate_rush_eve=zeros(length(t_rush_eve),1);
  error_estimate_off_eve=zeros(length(t_off_eve),1);
 
+% plot the figure of the exposed individuals in the hub and its immidiate
+% community based on the estimated parameters
 
 figure(1)
-% 
+
 plot (t_rush_mor, x_rush_mor(:,2),'-r',t_rush_mor,x_rush_mor(:,6),'-b' ,t_off_mor, x_off_mor(:,2),'-r', t_off_mor, x_off_mor(:,6),'-b' , ...
     t_rush_eve, x_rush_eve(:,2),'-r' , t_rush_eve, x_rush_eve(:,6), '-b' ,t_off_eve,x_off_eve(:,2),'-r' ,t_off_eve, x_off_eve(:,6),'-b' , 'LineWidth',2)
 legend('community','Hub')
@@ -256,14 +262,6 @@ CI_p_left=mu_p-1.96*(SD_p/sqrt(N_Sample_20));
 CI_p_right=mu_p+1.96*(SD_p/sqrt(N_Sample_20));
 
 
-
-
-
-
-
-
-
-
 %----------- Model Function----------------
 
     function [error_estimate  x_rush_mor x_off_mor x_rush_eve x_off_eve]=fmin_estimatettc_one(param)
@@ -342,71 +340,9 @@ op = odeset('RelTol',1e-5, 'AbsTol',1e-6);
 [~,x_off_eve]=ode45(@(t,x_off_eve)ttccase_one(t,x_off_eve,p_off_eve),t_off_eve,IC_estimate_off_eve,op);
 %% Result
 
-% Cumulative numbers of infectees in the community
-I_c_cum_rush_mor=cumsum(x_rush_mor(:,3));
-I_c_cum_off_mor=cumsum(x_off_mor(:,3));
- I_c_cum_rush_eve=cumsum(x_rush_eve(:,3));
- I_c_cum_off_eve=cumsum(x_off_eve(:,3));
 
-I_c_cum_end=I_c_cum_rush_mor(end)-I_0c+I_c_cum_off_mor(end)-x_off_mor(1,3)+I_c_cum_rush_eve(end)-...
-x_rush_eve(1,3)+I_c_cum_off_eve(end)-x_off_eve(1,3) ;  
+ %% excuting error_estimating matrices
 
- % Cumulative numbers of exposed individuals in the community
-
-E_c_cum_rush_mor=cumsum(x_rush_mor(:,2));
-E_c_cum_off_mor=cumsum(x_off_mor(:,2));
- E_c_cum_rush_eve=cumsum(x_rush_eve(:,2));
- E_c_cum_off_eve=cumsum(x_off_eve(:,2));
-
-E_c_cum_end=E_c_cum_rush_mor(end)-E_0c+E_c_cum_off_mor(end)-x_off_mor(1,2)+E_c_cum_rush_eve(end)-x_rush_eve(1,2)+...
-    E_c_cum_off_eve(end)-x_off_eve(1,2) ; 
-
- % Cumulative numbers of exposed individuals in the hub
-E_h_cum_rush_mor=cumsum(x_rush_mor(:,6));
-E_h_cum_off_mor=cumsum(x_off_mor(:,6));
- E_h_cum_rush_eve=cumsum(x_rush_eve(:,6));
- E_h_cum_off_eve=cumsum(x_off_eve(:,6));
-
-E_h_cum_end=E_h_cum_rush_mor(end)+E_h_cum_off_mor(end)-x_off_mor(1,6)+E_h_cum_rush_eve(end)-x_rush_eve(1,6)+...
-    E_h_cum_off_eve(end)-x_off_eve(1,6);
-
-% Cumulative numbers of infeted individuals in the hub
- 
-I_h_cum_rush_mor=cumsum(x_rush_mor(:,7));
-I_h_cum_off_mor=cumsum(x_off_mor(:,7));
- I_h_cum_rush_eve=cumsum(x_rush_eve(:,7));
- I_h_cum_off_eve=cumsum(x_off_eve(:,7));
-
-I_h_cum_end=I_h_cum_rush_mor(end)+I_h_cum_off_mor(end)-x_off_mor(1,7)+I_h_cum_rush_eve(end)-x_rush_eve(1,7)+...
-    I_h_cum_off_eve(end)-x_off_eve(1,7) ;  
-
-% Cumulative numbers of infeted individuals in the hub
-
-R_h_cum_rush_mor=cumsum(x_rush_mor(:,8));
-R_h_cum_off_mor=cumsum(x_off_mor(:,8));
- R_h_cum_rush_eve=cumsum(x_rush_eve(:,8));
- R_h_cum_off_eve=cumsum(x_off_eve(:,8));
-
-
-R_h_cum_end=R_h_cum_rush_mor(end)+R_h_cum_off_mor(end)-x_off_mor(1,8)+R_h_cum_rush_eve(end)-x_rush_eve(1,8)+...
-    R_h_cum_off_eve(end)-x_off_eve(1,8) ;  
-
-
- % Cumulative numbers of scucptible individuals in the hub
-
-S_h_cum_rush_mor=cumsum(x_rush_mor(:,5));
-S_h_cum_rush_mor(end);
-S_h_cum_off_mor=cumsum(x_off_mor(:,5));
- S_h_cum_rush_eve=cumsum(x_rush_eve(:,5));
- S_h_cum_off_eve=cumsum(x_off_eve(:,5));
-
-S_h_cum_end=S_h_cum_rush_mor(end)+S_h_cum_off_mor(end)-x_off_mor(1,5)+S_h_cum_rush_eve(end)-x_rush_eve(1,5)+...
-    S_h_cum_off_eve(end)-x_off_eve(1,5);
-
- % Cumulative numbers of  individuals visiting the hub (model-based)
-N_h_cum=S_h_cum_end+E_h_cum_end+I_h_cum_end+R_h_cum_end; 
-
- 
 for i=1:length(t_rush_mor)
 error_estimate_rush_mor(i)=(x_rush_mor(i,5)+x_rush_mor(i,6)+x_rush_mor(i,7)+x_rush_mor(i,8)-Data(i))^2;
 x_rush_total_mor_h(i)=x_rush_mor(i,5)+x_rush_mor(i,6)+x_rush_mor(i,7)+x_rush_mor(i,8);
@@ -439,42 +375,39 @@ x_off_total_eve_c(i)=x_off_eve(i,1)+x_off_eve(i,2)+x_off_eve(i,3)+x_off_eve(i,4)
 
 end
 
-
+% total error estimate matrix
 EE=[error_estimate_rush_mor'; error_estimate_off_mor';error_estimate_rush_eve';error_estimate_off_eve'];
 
+% find the cumulative of EE matrix
 EE_cum=cumsum(EE);
-R0_m=R0_estimate(param)
-error_estimate_rush_eve';
-error_estimate_off_mor';
-N_h_cum;
-x_rush_total_mor_h
-x_rush_total_mor_c;
-x_off_total_mor_h
-x_off_total_mor_c;
-x_rush_total_eve_h
-x_rush_total_eve_c;
-x_off_total_eve_h
-x_off_total_eve_c;
 
-t_total=linspace(0,20,21);
-Data_cum=cumsum(Data);
+%% evaluate R_0
+R0_m=R0_estimate(param)
+t_total=linspace(0,20,21);    % total time interval
+
+
+%% execute total number of number of the individuals visiting the hub over each time interval
+
 x_rush_cum_total_mor_h=cumsum(x_rush_total_mor_h);
-x_rush_cum_total_mor_c=cumsum(x_rush_total_mor_c);
+
 
 x_off_cum_total_mor_h=cumsum(x_off_total_mor_h);
-x_off_cum_total_mor_c=cumsum(x_off_total_mor_c);
+
 
 x_rush_cum_total_eve_h=cumsum(x_rush_total_eve_h);
-x_rush_cum_total_eve_c=cumsum(x_rush_total_eve_c);
 
 x_off_cum_total_eve_h=cumsum(x_off_total_eve_h);
-x_off_cum_total_eve_c=cumsum(x_off_total_eve_c);
+
+% total number of number of the individuals visiting the hub over a single
+% day
 
 N_h_total=x_rush_cum_total_mor_h(end)+x_off_cum_total_mor_h(end)-x_off_cum_total_mor_h(1)+...
    x_rush_cum_total_eve_h(end)- x_rush_cum_total_eve_h(1)+x_off_cum_total_eve_h(end)-x_off_cum_total_eve_h(1)
 
+%% excuting squares of errors
 error_estimate= EE_cum(end)+(R0_m-8.2)^2+(N_h_total-N_h_Finch)^2;
 
+%% ploting the fitted curve
 figure(2)
  plot(t_rush_mor,x_rush_total_mor_h,'-b', t_off_mor,x_off_total_mor_h,'-b', ...
      t_rush_eve,x_rush_total_eve_h,'-b',t_off_eve,x_off_total_eve_h,'-b', ...
@@ -483,6 +416,9 @@ figure(2)
 ylabel(' Number of Individuals Visiting Finch Station in a Single Day')
 
     end
+
+%% The following outputs are used in CTMC method executed with R
+
 Ex_cum_ode_rush_mor=[x_rush_mor(:,2)]
 Ex_cum_ode_off_mor=[ x_off_mor(:,2)]
 Ex_cum_ode_rush_eve=[x_rush_eve(:,2)]

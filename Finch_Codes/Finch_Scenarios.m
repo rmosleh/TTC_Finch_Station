@@ -1,5 +1,8 @@
 function Finch_Scenarios
 
+%% This program runs various scenarios for the dissemination of infectious diseases 
+%% in Finch Station and its immediate community
+
 format long
 
 %--------------- Parameters-----------
@@ -22,10 +25,10 @@ k_rush=139.8166578181;          % satuartion number for the force of infection o
 G_off=36339.5314556524;        % satuartion number for the force of infection of the hub  in off-peak hours
 G_rush=788210.2232412722;       % satuartion number for the force of infection of the hub  in rush hours
  p=0.0265663442;               %rate of carring infectious
- epsilon_c= 0.0116;
-epsilon_h= 0.00116;
-delta_c=0.0019;
-delta_h=0.00019;
+ epsilon_c= 0.0116;            % propagation rate for community
+ epsilon_h= 0.00116;            % propagation rate for hub
+ delta_c=0.0019;                % recuvery rate gor community 
+ delta_h=0.00019;               % recovery rate for hub
 
 
 
@@ -43,7 +46,7 @@ I_0h=0;                       %initial data for number of the infectious individ
 R_0h=0;                       % initial data for number of the recovered individuals in the hub
 IC_estimate=[S_0c,E_0c,I_0c,R_0c,S_0h,E_0h,I_0h,R_0h]; % Vector of the initial data
 
-%% Transmission rate for the community 
+%% impacts of various transmission rates of the community 
 
 s=[1, 0.8, 0.5, 0.3, 0.1];
 c=['r','b','k','g','m'];
@@ -81,44 +84,36 @@ p_off_2=[beta_c * s(i),beta_h_off_eve,alpha_off_eve,gamma_off_eve,k_off, G_off,p
 op = odeset('RelTol',1e-5, 'AbsTol',1e-6);
 [~,x_off_2]=ode45(@(t,x_off_2)ttccase_one(t,x_off_2,p_off_2),t_off_2,IC_estimate_off_2,op);
 
+
+% plot the exposed individuals for the comminity
 figure(1)
-
-
 plot (t_rush_1, x_rush_1(:,2), c(i), t_off_1, x_off_1(:,2), c(i),t_rush_2, x_rush_2(:,2),c(i),t_off_2,x_off_2(:,2),c(i),'LineWidth',2)
  hold on
 
-
-%legend({' Baseline ',' 20% decline ','50% decline ','70% decline ','90% decline '} )
 xlabel('Time (Hour)')
 ylabel(' Number of Exposed Individuals within the Community')
 title(' Impacts of Community Transmission Rates')
 
+% plot the exposed individuals for the hub
 figure(2)
-
 plot (t_rush_1, x_rush_1(:,6),c(i), t_off_1, x_off_1(:,6),c(i), t_rush_2, x_rush_2(:,6),c(i),t_off_2,x_off_2(:,6),c(i),'LineWidth',2)
 hold on 
-%legend({'Baseline','20% decline','50% decline','70% decline','90% decline'} )
 xlabel('Time (Hour)')
 ylabel(' Number of Exposed Individuals within the Hub')
 title('Impacts of Community Transmission Rates')
 end
 
-%% Transmission rate for the hub
+%% impacts of various transmission rates of the hub 
+
 
 for i=1:length(s)
-
-    %% Rush-peak hour Morning: 6AM-9AM
+ %% Rush-peak hour Morning: 6AM-9AM
 t_rush_1=linspace(0,3,4);
 IC_estimate_rush_1=IC_estimate;
 p_rush_1=[beta_c ,beta_h_rush_mor* s(i)  ,alpha_rush_mor,gamma_rush_mor,k_rush G_rush,p,epsilon_c,epsilon_h,delta_c,delta_h];
 
 op = odeset('RelTol',1e-5, 'AbsTol',1e-6);
 [~,x_rush_1]=ode45(@(t,x_rush_1)ttccase_one(t,x_rush_1,p_rush_1),t_rush_1,IC_estimate_rush_1,op);
-
-
-
-
-
 
 %% Off-peak hour midday: 9AM-3PM
 t_off_1=linspace(3,9,7);
@@ -143,26 +138,24 @@ p_off_2=[beta_c ,beta_h_off_eve* s(i),alpha_off_eve,gamma_off_eve,k_off, G_off,p
 op = odeset('RelTol',1e-5, 'AbsTol',1e-6);
 [~,x_off_2]=ode45(@(t,x_off_2)ttccase_one(t,x_off_2,p_off_2),t_off_2,IC_estimate_off_2,op);
 
+% plot the exposed individuals for the comminity
 figure(3)
-
 plot (t_rush_1, x_rush_1(:,2), c(i), t_off_1, x_off_1(:,2), c(i),t_rush_2, x_rush_2(:,2),c(i),t_off_2,x_off_2(:,2),c(i),'LineWidth',2)
 hold on 
-%legend('Baseline','20% decline','50% decline','70% decline','90% decline' )
 xlabel('Time (Hour)')
 ylabel(' Number of Exposed Individuals within the Community')
 title('Impacts of Hub Transmission Rates')
 
+% plot the exposed individuals for the hub
 figure(4)
-
 plot (t_rush_1, x_rush_1(:,6),c(i), t_off_1, x_off_1(:,6),c(i), t_rush_2, x_rush_2(:,6),c(i),t_off_2,x_off_2(:,6),c(i),'LineWidth',2)
 hold on 
-%legend('Baseline','20% decline','50% decline','70% decline','90% decline' )
 xlabel('Time (Hour)')
 ylabel(' Number of Exposed Individuals within the Hub')
 title('Impacts of Hub Transmission Rates')
 end
 % 
-%% Inflow rate
+%% impacts of various of inflow rates
 
 for i=1:length(s)
 
@@ -173,11 +166,6 @@ p_rush_1=[beta_c ,beta_h_rush_mor,alpha_rush_mor * s(i) ,gamma_rush_mor,k_rush G
 
 op = odeset('RelTol',1e-5, 'AbsTol',1e-6);
 [~,x_rush_1]=ode45(@(t,x_rush_1)ttccase_one(t,x_rush_1,p_rush_1),t_rush_1,IC_estimate_rush_1,op);
-
-
-
-
-
 
 %% Off-peak hour midday: 9AM-3PM
 t_off_1=linspace(3,9,7);
@@ -202,26 +190,24 @@ p_off_2=[beta_c,beta_h_off_eve,alpha_off_eve* s(i),gamma_off_eve,k_off, G_off,p,
 op = odeset('RelTol',1e-5, 'AbsTol',1e-6);
 [~,x_off_2]=ode45(@(t,x_off_2)ttccase_one(t,x_off_2,p_off_2),t_off_2,IC_estimate_off_2,op);
 
+% plot the exposed individuals for the comminity
 figure(5)
-
 plot (t_rush_1, x_rush_1(:,2), c(i), t_off_1, x_off_1(:,2), c(i),t_rush_2, x_rush_2(:,2),c(i),t_off_2,x_off_2(:,2),c(i),'LineWidth',2)
 hold on 
-%legend('Baseline','20% decline','50% decline','70% decline','90% decline' )
 xlabel('Time (Hour)')
 ylabel(' Number of Exposed Individuals within the Community')
 title('Impacts of Inflow Rates')
 
+% plot the exposed individuals for the hub
 figure(6)
-
 plot (t_rush_1, x_rush_1(:,6),c(i), t_off_1, x_off_1(:,6),c(i), t_rush_2, x_rush_2(:,6),c(i),t_off_2,x_off_2(:,6),c(i),'LineWidth',2)
 hold on 
-%legend('Baseline','20% decline','50% decline','70% decline','90% decline' )
 xlabel('Time (Hour)')
 ylabel(' Number of Exposed Individuals within the Hub')
 title('Impacts of Inflow Rates')
 end
 % 
-%% Outflow rate
+%% impacts of various of outflow rate
 
 for i=1:length(s)
 
@@ -232,11 +218,6 @@ p_rush_1=[beta_c ,beta_h_rush_mor  ,alpha_rush_mor  ,gamma_rush_mor * s(i),k_rus
 
 op = odeset('RelTol',1e-5, 'AbsTol',1e-6);
 [~,x_rush_1]=ode45(@(t,x_rush_1)ttccase_one(t,x_rush_1,p_rush_1),t_rush_1,IC_estimate_rush_1,op);
-
-
-
-
-
 
 %% Off-peak hour midday: 9AM-3PM
 t_off_1=linspace(3,9,7);
@@ -261,8 +242,8 @@ p_off_2=[beta_c,beta_h_off_eve,alpha_off_eve ,gamma_off_eve * s(i),k_off, G_off,
 op = odeset('RelTol',1e-5, 'AbsTol',1e-6);
 [~,x_off_2]=ode45(@(t,x_off_2)ttccase_one(t,x_off_2,p_off_2),t_off_2,IC_estimate_off_2,op);
 
+% plot the exposed individuals for the comminity
 figure(7)
-
 plot (t_rush_1, x_rush_1(:,2), c(i), t_off_1, x_off_1(:,2), c(i),t_rush_2, x_rush_2(:,2),c(i),t_off_2,x_off_2(:,2),c(i),'LineWidth',2)
 hold on 
 %legend('Baseline','20% decline','50% decline','70% decline','90% decline' )
@@ -270,8 +251,8 @@ xlabel('Time (Hour)')
 ylabel(' Number of Exposed Individuals within the Community')
 title('Impacts of Outflow Rates')
 
+% plot the exposed individuals for the hub
 figure(8)
-
 plot (t_rush_1, x_rush_1(:,6),c(i), t_off_1, x_off_1(:,6),c(i), t_rush_2, x_rush_2(:,6),c(i),t_off_2,x_off_2(:,6),c(i),'LineWidth',2)
 hold on 
 %legend('Baseline','20% decline','50% decline','70% decline','90% decline' )
@@ -280,7 +261,7 @@ ylabel(' Number of Exposed Individuals within the Hub')
 title('Impacts of Outflow Rates')
 end
 % % 
-%% Inflow and Outflow rates
+%% impacts of various of inflow and outflow rates
 
 for i=1:length(s)
 
@@ -290,11 +271,6 @@ IC_estimate_rush_1=IC_estimate;
 p_rush_1=[beta_c ,beta_h_rush_mor  ,alpha_rush_mor * s(i) ,gamma_rush_mor * s(i),k_rush G_rush,p,epsilon_c,epsilon_h,delta_c,delta_h];
 op = odeset('RelTol',1e-5, 'AbsTol',1e-6);
 [~,x_rush_1]=ode45(@(t,x_rush_1)ttccase_one(t,x_rush_1,p_rush_1),t_rush_1,IC_estimate_rush_1,op);
-
-
-
-
-
 
 %% Off-peak hour midday: 9AM-3PM
 t_off_1=linspace(3,9,7);
@@ -319,26 +295,24 @@ p_off_2=[beta_c,beta_h_off_eve,alpha_off_eve * s(i),gamma_off_eve  * s(i),k_off,
 op = odeset('RelTol',1e-5, 'AbsTol',1e-6);
 [~,x_off_2]=ode45(@(t,x_off_2)ttccase_one(t,x_off_2,p_off_2),t_off_2,IC_estimate_off_2,op);
 
+% plot the exposed individuals for the comminity
 figure(9)
-
 plot (t_rush_1, x_rush_1(:,2), c(i), t_off_1, x_off_1(:,2), c(i),t_rush_2, x_rush_2(:,2),c(i),t_off_2,x_off_2(:,2),c(i),'LineWidth',2)
 hold on 
-%legend('Baseline','20% decline','50% decline','70% decline','90% decline' )
 xlabel('Time (Hour)')
 ylabel(' Number of Exposed Individuals within the Community')
 title('Impacts of Inflow and Outflow Rates')
 
+% plot the exposed individuals for the hub
 figure(10)
-
 plot (t_rush_1, x_rush_1(:,6),c(i), t_off_1, x_off_1(:,6),c(i), t_rush_2, x_rush_2(:,6),c(i),t_off_2,x_off_2(:,6),c(i),'LineWidth',2)
 hold on 
-%legend('Baseline','20% decline','50% decline','70% decline','90% decline' )
 xlabel('Time (Hour)')
 ylabel(' Number of Exposed Individuals within the Hub')
 title('Impacts of Inflow and Outflow Rates')
 end
-% 
-%% Inflow and Outflow rates-Heatmaps
+
+%% impacts of various of inflow and iutflow rates-Heatmaps
 
 s_1=0.0:0.01:1;
 s_2=0.0:0.01:1;
@@ -352,11 +326,6 @@ p_rush_1=[beta_c ,beta_h_rush_mor,alpha_rush_mor * (1-s_1(k)) ,gamma_rush_mor * 
 
 op = odeset('RelTol',1e-5, 'AbsTol',1e-6);
 [~,x_rush_1]=ode45(@(t,x_rush_1)ttccase_one(t,x_rush_1,p_rush_1),t_rush_1,IC_estimate_rush_1,op);
-
-
-
-
-
 
 %% Off-peak hour midday: 9AM-3PM
 t_off_1=linspace(3,9,7);
@@ -382,8 +351,6 @@ op = odeset('RelTol',1e-5, 'AbsTol',1e-6);
 [~,x_off_2]=ode45(@(t,x_off_2)ttccase_one (t,x_off_2,p_off_2),t_off_2,IC_estimate_off_2,op);
 
 %%
-
-
 
 M_com_rush_1=max(x_rush_1(:,2));
 M_com_off_1=max(x_off_1(:,2));

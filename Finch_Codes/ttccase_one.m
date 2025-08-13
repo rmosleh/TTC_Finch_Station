@@ -1,4 +1,5 @@
 function dIdt=ttccase_one(t, I, par)
+%% this is a supplementary function used in Finch_Estimation and Finch_Scenarios codes
 beta_c=par(1);
 beta_h=par(2);
 alpha=par(3);
